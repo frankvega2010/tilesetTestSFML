@@ -30,7 +30,11 @@ void main()
 		window.clear();
 		// Draw the map
 		window.draw(map);
-		view.move(0.0f, 0.01f);
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+		{
+			view.move(0.0f, 0.05f);
+		}
+		
 		window.setView(view);
 		//view.move(100.0f, 100.f);
 		// Update the window
