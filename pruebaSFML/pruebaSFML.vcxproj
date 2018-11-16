@@ -118,19 +118,14 @@ XCOPY "$(SolutionDir)lib\SFML-2.5.1\bin\sfml-window-2.dll" "$(TargetDir)" /E /Y 
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\SFML-2.5.1\lib;$(SolutionDir)lib\STP\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sfml-graphics.lib;sfml-window.lib;sfml-system.lib;STP.lib;zlib.lib;pugixml.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PostBuildEvent>
-      <Command>XCOPY "$(SolutionDir)lib\SFML-2.5.1\bin\sfml-graphics-2.dll" "$(TargetDir)" /E /Y /S
-XCOPY "$(SolutionDir)lib\SFML-2.5.1\bin\sfml-system-2.dll" "$(TargetDir)" /E /Y /S
-XCOPY "$(SolutionDir)lib\SFML-2.5.1\bin\sfml-window-2.dll" "$(TargetDir)" /E /Y /S
-XCOPY "$(SolutionDir)lib\STP\bin\STP.dll" "$(TargetDir)" /E /Y /S
-XCOPY "$(SolutionDir)lib\STP\bin\zlib.dll" "$(TargetDir)" /E /Y /S
-MKDIR "$(TargetDir)res/assets"
-XCOPY "$(SolutionDir)res/assets" "$(TargetDir)res/assets" /E /Y /S</Command>
+      <Command>$(ProjectDir)copyfiles.bat  "$(TargetDir)" "$(SolutionDir)" 
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
