@@ -9,12 +9,9 @@ using namespace std;
 
 void main()
 {
-	//struct untest
-	//{
-	//	Vector4
-	//};
-
-	std::string algo = "algo";
+	//test.setPosition(sf::Vector2f((int)map.GetObjectGroup("colision").GetPropertyValue("x").c_str(), (int)map.GetObjectGroup("colision").GetPropertyValue("y").c_str()));
+	//test.setPosition(sf::Vector2f(map.GetTileSet(30)->GetTile(2).GetTextureRect().left, map.GetTileSet(30)->GetTile(2).GetTextureRect().top));
+	//test.setSize(sf::Vector2f((int)map.GetObjectGroup("colision").GetPropertyValue("width").c_str(), (int)map.GetObjectGroup("colision").GetPropertyValue("height").c_str()));
 
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;
@@ -26,7 +23,7 @@ void main()
 	sf::CircleShape triangle(80.f, 3);
 	
 
-	//map.ShowObjects(); // Display all the layer objects.
+	map.ShowObjects(); // Display all the layer objects.
 
 	sf::View view(sf::FloatRect(200.f, 200.f, 800.f, 600.f));
 
@@ -34,31 +31,34 @@ void main()
 
 										   // Start the game loop
 
-	view.setCenter(450.f, 450.f);
+	view.setCenter(1930.0f, 450.f);
 	view.zoom(2.0f);
-	triangle.move(450.0f, 450.0f);
-	//view.move(300.0f, 300.f);
-
-	/*cout << map.GetLayer("fondo").GetHeight();
-	cout << map.GetLayer("fondo").GetWidth();*/
-
-	cout << map.GetTileSet(1)->GetTileWidth() << endl;
-	cout << map.GetTileSet(1)->GetTileHeight() << endl;
-	//sf::Vector2f asd = map.GetTileSet(1)->GetTile(1).GetTextureRect();
+	triangle.move(1930.0f, 450.0f);
 	sf::RectangleShape test;
 
-	test.setSize(sf::Vector2f(map.GetTileSet(30)->GetTileWidth(), map.GetTileSet(30)->GetTileHeight()));
-	//test.setPosition(sf::Vector2f(2, 2));
-	cout << map.GetTileSet(30);
-	map.GetLayer("1");
+
 	map.GetTileSet(1)->GetTile(0);
 	
-	test.setPosition(sf::Vector2f(map.GetTileSet(30)->GetTile(0).GetTextureRect().left, map.GetTileSet(30)->GetTile(0).GetTextureRect().top));
-	test.setFillColor(sf::Color::Green);
+	
+	test.setSize(sf::Vector2f(770,210));
+	test.setPosition(sf::Vector2f(1960, 1330));
+	
+	test.setFillColor(sf::Color::Transparent);
+
+	sf::Clock deltaClock;
+	sf::Time deltaTime;
+
+	int DefaultSpeedX = 0.0f;
+	int DefaultSpeedY = 0.0f;
+	bool unBool = false;
+	bool otroBool = false;
+	bool unBoolY = false;
+	bool otroBoolY = false;
 
 	while (window.isOpen()) {
 		// Process events
 		sf::Event event;
+
 		while (window.pollEvent(event)) {
 			// Close window : exit
 			if (event.type == sf::Event::Closed)
@@ -71,50 +71,83 @@ void main()
 		window.draw(test);
 		window.draw(triangle);
 
+		if (triangle.getPosition().x > view.getCenter().x + 300)
+		{
+			if (!(unBool))
+			{
+				unBool = true;
+				otroBool = false;
+			}
+		}
+		else if (triangle.getPosition().x < view.getCenter().x - 300)
+		{
+			if (!(otroBool))
+			{
+				otroBool = true;
+				unBool = false;
+			}
+		}
+
+		if (triangle.getPosition().y > view.getCenter().y + 300)
+		{
+			if (!(unBoolY))
+			{
+				unBoolY = true;
+				otroBoolY = false;
+			}
+		}
+		else if (triangle.getPosition().y < view.getCenter().y - 300)
+		{
+			if (!(otroBoolY))
+			{
+				otroBoolY = true;
+				unBoolY = false;
+			}
+		}
+
 		
 
-		/*view.move(0.0f, 1.0f);
+		if (unBoolY) view.setCenter(view.getCenter().x, triangle.getPosition().y - 300); //triangle.getPosition().y - 300
+		if (otroBoolY) view.setCenter(view.getCenter().x, triangle.getPosition().y + 300); ////triangle.getPosition().y + 300
 
-		triangle.move(view.getCenter());*/
+		if (unBool) view.setCenter(triangle.getPosition().x - 300, view.getCenter().y);
+		if (otroBool) view.setCenter(triangle.getPosition().x + 300, view.getCenter().y);
 
-		
-		
-		
-		// ;
-
-		//view.move(triangle.getOrigin());
+		DefaultSpeedX = 800.0f;
+		DefaultSpeedY = 800.0f;
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
 		{
-			view.move(0.0f, 1.0f);
-			triangle.move(0,1.0f);
+			otroBoolY = false;
+			triangle.move(0, (DefaultSpeedY * deltaTime.asSeconds()));
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
 		{
-			view.move(0.0f, -1.0f);
-			triangle.move(0, -1.0f);
+			unBoolY = false;
+			triangle.move(0, (DefaultSpeedY * deltaTime.asSeconds())*(-1));
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 		{
-			view.move(-1.0f, 0.0f);
-			triangle.move(-1.0f, 0.0f);
+			unBool = false;
+			triangle.move((DefaultSpeedX * deltaTime.asSeconds())*(-1), 0);
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 		{
-			view.move(1.0f, 0.0f);
-			triangle.move(1.0f, 0.0f);
+			otroBool = false;
+			triangle.move((DefaultSpeedX * deltaTime.asSeconds()), 0);
 		}
 
 		if (triangle.getGlobalBounds().intersects(test.getGlobalBounds()))
 		{
-			map.GetLayer("1").SetColor({255,0,0});
+			triangle.setPosition(triangle.getPosition().x,test.getPosition().y - (triangle.getLocalBounds().height));
+			map.GetLayer("plataforma").SetColor({255,0,0});
 		}
 		else
 		{
-			map.GetLayer("1").SetColor({ 255,255,255});
+			map.GetLayer("plataforma").SetColor({ 255,255,255});
 		}
 		
 		window.setView(view);
@@ -122,5 +155,7 @@ void main()
 		// Update the window
 		window.display();
 
+		
+		deltaTime = deltaClock.restart();
 	}
 }
