@@ -1,6 +1,8 @@
 //#include "SFML/Window.hpp"
 #include "SFML/Graphics.hpp"
 #include "STP/TMXLoader.hpp"
+#include "pugixml.hpp"
+#include "pugiconfig.hpp"
 #include <iostream>
 #include <string>
 
@@ -9,18 +11,42 @@ using namespace std;
 
 void main()
 {
-	//test.setPosition(sf::Vector2f((int)map.GetObjectGroup("colision").GetPropertyValue("x").c_str(), (int)map.GetObjectGroup("colision").GetPropertyValue("y").c_str()));
-	//test.setPosition(sf::Vector2f(map.GetTileSet(30)->GetTile(2).GetTextureRect().left, map.GetTileSet(30)->GetTile(2).GetTextureRect().top));
-	//test.setSize(sf::Vector2f((int)map.GetObjectGroup("colision").GetPropertyValue("width").c_str(), (int)map.GetObjectGroup("colision").GetPropertyValue("height").c_str()));
+	const int maxColisionsBoxes = 4;
 
-	sf::ContextSettings settings;
+	pugi::xml_document doc;
+
+	pugi::xml_parse_result result = doc.load_file("res/assets/tiles/testlevel.tmx"); // Locates the file to be used.
+
+	pugi::xml_node object = doc.child("map").child("objectgroup"); // Clean way to locate a specific group of attributes instead of always typing the same command.
+
+
+		/////////////////////////
+		// Example :
+		/*Manually
+
+		doc.child("map").child("objectgroup").child("object").attribute("x").as_int()
+		doc.child("map").child("objectgroup").child("object").attribute("y").as_int()
+
+		With xml_node
+
+		object()->attribute("x").as_int();
+		object()->attribute("y").as_int();*/
+		//
+		/////////////////////////
+
+	pugi::xml_node_iterator someObjects = object.begin(); // test purposes, not used for making collision shapes. 
+	// It was used to manually select objects ids.
+
+	sf::ContextSettings settings; // render settings
 	settings.antialiasingLevel = 8;
 
 	//sf::RenderWindow window(sf::VideoMode(1300, 800), "STP Example");
 	sf::RenderWindow window(sf::VideoMode(1300, 800), "STP Example", sf::Style::Default, settings);
-	tmx::TileMap map("res/assets/tiles/testlevel.tmx");
 
-	sf::CircleShape triangle(80.f, 3);
+
+	tmx::TileMap map("res/assets/tiles/testlevel.tmx"); // TileMap
+
+	sf::CircleShape triangle(80.f, 3); // player
 	
 
 	map.ShowObjects(); // Display all the layer objects.
@@ -34,15 +60,36 @@ void main()
 	view.setCenter(1930.0f, 450.f);
 	view.zoom(2.0f);
 	triangle.move(1930.0f, 450.0f);
-	sf::RectangleShape test;
+
+	sf::RectangleShape test; // not used in final game, just for testing purposes.
+	sf::RectangleShape rectangles[maxColisionsBoxes];
 
 
-	map.GetTileSet(1)->GetTile(0);
-	
-	
-	test.setSize(sf::Vector2f(770,210));
-	test.setPosition(sf::Vector2f(1960, 1330));
-	
+	someObjects = ++someObjects; // manually changing the object id
+	someObjects = ++someObjects; // manually changing the object id
+
+	cout << someObjects->attribute("x").as_int(); // it will use the third object "x" value.
+
+
+	//// Adding Colission box Rectangles from the .tmx Tilemap File
+	//
+	int i = 0;
+	for (pugi::xml_node_iterator it = object.begin(); it != object.end(); ++it)
+	{
+		rectangles[i].setPosition(sf::Vector2f(it->attribute("x").as_int(),
+												it->attribute("y").as_int()));
+
+		rectangles[i].setSize(sf::Vector2f(it->attribute("width").as_int(),
+											it->attribute("height").as_int()));
+
+		rectangles[i].setFillColor(sf::Color::Green);
+		i++;
+	}
+	i = 0;
+	//
+	////
+	test.setPosition(sf::Vector2f(0, 0));
+	test.setSize(sf::Vector2f(0, 0));
 	test.setFillColor(sf::Color::Transparent);
 
 	sf::Clock deltaClock;
@@ -70,6 +117,11 @@ void main()
 		window.draw(map);
 		window.draw(test);
 		window.draw(triangle);
+
+		for (int i = 0; i < maxColisionsBoxes; i++)
+		{
+			window.draw(rectangles[i]);
+		}
 
 		if (triangle.getPosition().x > view.getCenter().x + 300)
 		{
@@ -148,6 +200,19 @@ void main()
 		else
 		{
 			map.GetLayer("plataforma").SetColor({ 255,255,255});
+		}
+
+		for (int i = 0; i < maxColisionsBoxes; i++)
+		{
+			if (triangle.getGlobalBounds().intersects(rectangles[i].getGlobalBounds()))
+			{
+				triangle.setPosition(triangle.getPosition().x, rectangles[i].getPosition().y - (triangle.getLocalBounds().height));
+				map.GetLayer("plataforma").SetColor({ 255,0,0 });
+			}
+			else
+			{
+				map.GetLayer("plataforma").SetColor({ 255,255,255 });
+			}
 		}
 		
 		window.setView(view);
